@@ -9,26 +9,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Uploads go in /tmp on Render
+// Uploads go in /tmp
 const upload = multer({ dest: "/tmp" });
 
-// 🔥 Initialize model ONCE (important!)
-await nodewhisper({
-  modelName: "models/ggml-tiny.bin", // Must be in the project root
+// ✅ 1. Initialize ONCE
+const whisper = await nodewhisper({
+  modelName: "models/ggml-tiny.bin", // must be inside repo
   removeWavFileAfterTranscription: true,
 });
 
-// 🎤 POST /api/transcribe
+// ✅ 2. API route
 app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No audio uploaded" });
     }
 
-    // 🔥 Run transcription using nodewhisper(), NOT whisper()
-    const result = await nodewhisper(req.file.path, {
+    // 🎤 Transcribe using the instance
+    const result = await whisper(req.file.path, {
       language: "ar",
-      removeWavFileAfterTranscription: true,
     });
 
     res.json({ text: result.text ?? result });
@@ -38,6 +37,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
-// Render port requirement
+// Required for Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on port", PORT));
