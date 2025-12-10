@@ -14,7 +14,7 @@ const upload = multer({ dest: "/tmp" });
 
 // ✅ Initialize Whisper (loads model ONCE)
 const whisper = await nodewhisper({
-  modelName: "ggml-small.bin", // place this inside project root
+  modelName: "models/ggml-tiny.bin", // place this inside project root
   removeWavFileAfterTranscription: true,
 });
 
